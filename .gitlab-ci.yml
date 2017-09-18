@@ -22,7 +22,7 @@ build_wordpress:
   script:
     - apk --no-cache add git
     - git submodule add git://github.com/WordPress/WordPress.git wordpress
-    - cd /builds/$CI_PROJECT_PATH/site/wordpress
+    - cd wordpress
     - git checkout $WORDPRESS_VERSION
 
 build_image:

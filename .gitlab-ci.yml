@@ -21,6 +21,7 @@ build_wordpress:
     expire_in: 1 hour
   script:
     - apk --no-cache add git
+    - git submodule add git://github.com/WordPress/WordPress.git wordpress
     - cd /builds/$CI_PROJECT_PATH/site/wordpress
     - git checkout $WORDPRESS_VERSION
 

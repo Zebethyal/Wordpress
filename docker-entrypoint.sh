@@ -217,6 +217,9 @@ EOPHP
     cp -Rp /var/www/html/release/wordpress/wp-content /var/www/html/shared/
   fi
 
+  # edit document root
+  sed -i "/DocumentRoot/c\DocumentRoot /var/www/html/release" /etc/apache2/sites-available/000-default.conf
+
   # now that we're definitely done writing configuration, let's clear out the relevant envrionment variables (so that stray "phpinfo()" calls don't leak secrets from our code)
   for e in "${envs[@]}"; do
     unset "$e"

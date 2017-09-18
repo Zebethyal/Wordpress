@@ -28,6 +28,7 @@ RUN { \
 RUN a2enmod rewrite expires
 
 VOLUME /var/www/html
+WORKDIR /var/www/html/release
 
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY site /var/www/html/release

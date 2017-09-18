@@ -45,6 +45,7 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
     "${uniqueEnvs[@]/#/WORDPRESS_}"
     WORDPRESS_TABLE_PREFIX
     WORDPRESS_DEBUG
+    WORDPRESS_URL
   )
 
   haveConfig=
@@ -79,18 +80,27 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
     # version 4.4.1 decided to switch to windows line endings, that breaks our seds and awks
     # https://github.com/docker-library/wordpress/issues/116
     # https://github.com/WordPress/WordPress/commit/1acedc542fba2482bab88ec70d4bea4b997a92e4
-    sed -ri -e 's/\r$//' wp-config*
+    sed -ri -e 's/\r$//' wordpress/wp-config*
 
-    if [ ! -e wp-config.php ]; then
-      awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wp-config-sample.php > wp-config.php <<'EOPHP'
+    if [ ! -e /var/www/html/shared/wp-config.php ]; then
+      awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wordpress/wp-config-sample.php > /var/www/html/shared/wp-config.php <<'EOPHP'
 // If we're behind a proxy server and using HTTPS, we need to alert Wordpress of that fact
 // see also http://codex.wordpress.org/Administration_Over_SSL#Using_a_Reverse_Proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
   $_SERVER['HTTPS'] = 'on';
 }
 
+define('WP_HOME', 'unset');
+define('WP_SITEURL', 'unset');
+define('WP_CONTENT_DIR', '/var/www/html/shared/wp-content/');
+define('WP_CONTENT_URL', 'unset');
+define('WP_PLUGIN_DIR', '/var/www/html/shared/wp-content/plugins/');
+define('WP_PLUGIN_URL', 'unset');
+define('FS_METHOD', 'direct');
+
 EOPHP
-      chown www-data:www-data wp-config.php
+      chown www-data:www-data /var/www/html/shared/wp-config.php
+      chmod 640 /var/www/html/shared/wp-config.php
     fi
 
     # see http://stackoverflow.com/a/2705678/433558
@@ -120,7 +130,7 @@ EOPHP
         start="^(\s*)$(sed_escape_lhs "$key")\s*="
         end=";"
       fi
-      sed -ri -e "s/($start\s*).*($end)$/\1$(sed_escape_rhs "$(php_escape "$value" "$var_type")")\3/" wp-config.php
+      sed -ri -e "s/($start\s*).*($end)$/\1$(sed_escape_rhs "$(php_escape "$value" "$var_type")")\3/" /var/www/html/shared/wp-config.php
     }
 
     set_config 'DB_HOST' "$WORDPRESS_DB_HOST"
@@ -129,11 +139,8 @@ EOPHP
     set_config 'DB_NAME' "$WORDPRESS_DB_NAME"
     set_config 'WP_HOME' "$WORDPRESS_URL"
     set_config 'WP_SITEURL' "$WORDPRESS_URL/wordpress"
-    set_config 'WP_CONTENT_DIR' "realpath(ABSPATH . '../../shared/wp-content/')"
     set_config 'WP_CONTENT_URL' "${WORDPRESS_URL}/wp-content"
-    set_config 'WP_PLUGIN_DIR' "realpath(ABSPATH . '../../shared/wp-content/plugins/')"
     set_config 'WP_PLUGIN_URL' "${WORDPRESS_URL}/wp-content/plugins"
-    set_config 'FS_METHOD' "direct"
 
     for unique in "${uniqueEnvs[@]}"; do
       uniqVar="WORDPRESS_$unique"
@@ -141,7 +148,7 @@ EOPHP
         set_config "$unique" "${!uniqVar}"
       else
         # if not specified, let's generate a random value
-        currentVal="$(sed -rn -e "s/define\((([\'\"])$unique\2\s*,\s*)(['\"])(.*)\3\);/\4/p" wp-config.php)"
+        currentVal="$(sed -rn -e "s/define\((([\'\"])$unique\2\s*,\s*)(['\"])(.*)\3\);/\4/p" /var/www/html/shared/wp-config.php)"
         if [ "$currentVal" = 'put your unique phrase here' ]; then
           set_config "$unique" "$(head -c1m /dev/urandom | sha1sum | cut -d' ' -f1)"
         fi

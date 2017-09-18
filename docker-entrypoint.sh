@@ -97,7 +97,7 @@ EOPHP
     sed_escape_lhs() {
       echo "$@" | sed -e 's/[]\/$*.^|[]/\\&/g'
     }
-    
+
     sed_escape_rhs() {
       echo "$@" | sed -e 's/[\/&]/\\&/g'
     }
@@ -197,6 +197,17 @@ if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_strin
 
 $mysql->close();
 EOPHP
+  fi
+
+  # make sure our shared content locations are present
+  if [ ! -d /var/www/html/shared ]; then
+    mkdir -p /var/www/html/shared
+    chown www-data:www-data /var/www/html/shared
+  fi
+
+  # init wp-content if it's not already there
+  if [ ! -d /var/www/html/shared/wp-content ]; then
+    cp -Rp /var/www/html/release/wordpress/wp-content /var/www/html/shared/
   fi
 
   # now that we're definitely done writing configuration, let's clear out the relevant envrionment variables (so that stray "phpinfo()" calls don't leak secrets from our code)

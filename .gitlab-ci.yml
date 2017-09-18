@@ -1,0 +1,37 @@
+variables:
+  IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
+
+stages:
+  - prep
+  - build
+
+build_wordpress:
+  stage: prep
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    WORDPRESS_VERSION: 4.8.1
+  artifacts:
+    name: "$CI_JOB_NAME"
+    untracked: true
+    paths: 
+     - site/wordpress
+    expire_in: 1 hour
+  script:
+    - apk --no-cache add git
+    - cd /builds/$CI_PROJECT_PATH/site/wordpress
+    - git checkout $WORDPRESS_VERSION
+
+build_image:
+  stage: build
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  dependencies:
+    - build_wordpress
+  script:
+    - docker build --pull -t $IMAGE .
+    - docker push $IMAGE
+

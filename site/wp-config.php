@@ -1,0 +1,1 @@
+../shared/wp-config.php

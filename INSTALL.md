@@ -16,7 +16,7 @@ docker run -d -v wp-data:/var/www/html/shared -p 8080:80 \
 -e WORDPRESS_DB_HOST='db.example.com' -e WORDPRESS_DB_USER='wp_user' \
 -e WORDPRESS_DB_PASSWORD='useRancherSecretsInstead' \
 -e WORDPRESS_DB_NAME='wordpress' -e WORDPRESS_URL='https://www.example.com' \
-monachus/docker-wordpress:4.8.1
+monachus/wordpress:4.8.1
 ```
 
 ## Detailed Version
@@ -57,7 +57,7 @@ volumes:
     driver: rancher-nfs
 services:
   www:
-    image: monachus/docker-wordpress:4.8.1
+    image: monachus/wordpress:4.8.1
     environment:
       WORDPRESS_DB_HOST: mariadb.db
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_pass

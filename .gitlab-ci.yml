@@ -1,9 +1,11 @@
 variables:
   IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
+  DOCKER_IMAGE: monachus/$CI_PROJECT_PATH_SLUG
 
 stages:
   - prep
   - build
+  - release
 
 build_wordpress:
   stage: prep
@@ -35,3 +37,13 @@ build_image:
     - docker build --pull -t $IMAGE .
     - docker push $IMAGE
 
+push_to_docker_hub:
+  stage: release
+  script:
+    - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
+    - docker tag $IMAGE $DOCKER_IMAGE:$CI_BUILD_REF_NAME
+    - docker tag $IMAGE $DOCKER_IMAGE:latest
+    - docker push $DOCKER_IMAGE:$CI_BUILD_REF_NAME
+    - docker push $DOCKER_IMAGE:latest
+  only:
+    - master

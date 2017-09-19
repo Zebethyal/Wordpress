@@ -1,6 +1,6 @@
 variables:
   IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
-  DOCKER_IMAGE: monachus/$CI_PROJECT_PATH_SLUG
+  DOCKER_IMAGE: monachus/wordpress
 
 stages:
   - prep

@@ -46,4 +46,4 @@ push_to_docker_hub:
     - docker push $DOCKER_IMAGE:$CI_BUILD_REF_NAME
     - docker push $DOCKER_IMAGE:latest
   only:
-    - master
+    - tags

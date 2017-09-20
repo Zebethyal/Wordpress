@@ -24,6 +24,7 @@ build_wordpress:
   script:
     - apk --no-cache add git
     - cd site/wordpress
+    - git fetch --all
     - git tag
     - git checkout $WORDPRESS_VERSION
 

@@ -94,7 +94,6 @@ define('WP_HOME', 'unset');
 define('WP_SITEURL', 'unset');
 define('WP_CONTENT_DIR', '/var/www/html/shared/wp-content/');
 define('WP_CONTENT_URL', 'unset');
-define('WP_PLUGIN_DIR', '/var/www/html/shared/wp-content/plugins/');
 define('WP_PLUGIN_URL', 'unset');
 define('FS_METHOD', 'direct');
 

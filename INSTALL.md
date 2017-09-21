@@ -28,7 +28,6 @@ define('WP_HOME', 'https://www.example.com');
 define('WP_SITEURL', 'https://www.example.com/wordpress');
 define('WP_CONTENT_DIR', '/var/www/html/shared/wp-content/');
 define('WP_CONTENT_URL', 'https://www.example.com/wp-content');
-define('WP_PLUGIN_DIR', '/var/www/html/shared/wp-content/plugins/');
 define('WP_PLUGIN_URL', 'https://www.example.com/wp-content/plugins');
 ```
 
@@ -63,7 +62,7 @@ services:
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_pass
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wp_user
-      WORDPRESS_URL: https://www.example.co,
+      WORDPRESS_URL: https://www.example.com
     volumes:
     - wp-data:/var/www/html/shared
     secrets:
@@ -73,7 +72,6 @@ services:
       source: wordpress-db-pass-v1
       target: db_pass
 secrets:
-  wordpress-db-
-  pass-v1:
+  wordpress-db-pass-v1:
     external: 'true'
 ```

@@ -216,6 +216,22 @@ EOPHP
     cp -Rp /var/www/html/release/wordpress/wp-content /var/www/html/shared/
   fi
 
+  # init .htaccess if not present
+  if [ ! -f /var/www/html/shared/.htaccess ]; then
+    cat << "EOT" > /var/www/html/shared/.htaccess
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress
+EOT
+  fi
   # edit document root
   sed -i "/DocumentRoot/c\DocumentRoot /var/www/html/release" /etc/apache2/sites-available/000-default.conf
 

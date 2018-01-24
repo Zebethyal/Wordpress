@@ -27,6 +27,8 @@ build_wordpress:
     - git checkout master
     - git pull --tags
     - git checkout $WORDPRESS_VERSION
+  except:
+    - master
 
 build_image:
   stage: build

@@ -38,6 +38,8 @@ build_image:
   script:
     - docker build --pull -t $IMAGE .
     - docker push $IMAGE
+  except:
+    - master
 
 push_to_docker_hub:
   stage: release

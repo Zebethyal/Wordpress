@@ -14,7 +14,7 @@ build_wordpress:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
-    WORDPRESS_VERSION: 4.8.5
+    WORDPRESS_VERSION: 4.9.4
   artifacts:
     name: "$CI_JOB_NAME"
     untracked: true

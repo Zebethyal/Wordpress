@@ -24,8 +24,13 @@ build_wordpress:
   script:
     - apk --no-cache add git
     - cd site/wordpress
+    - umask
+    - ls -l site/wordpress
+    # - git checkout master
     - git pull --tags
     - git checkout $WORDPRESS_VERSION
+    - umask
+    - ls -l
   except:
     - master
 

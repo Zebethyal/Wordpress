@@ -23,13 +23,9 @@ build_wordpress:
     expire_in: 1 hour
   script:
     - apk --no-cache add git
-    - umask
-    - ls -l site/wordpress
     - cd site/wordpress
     - git pull --tags
     - git checkout $WORDPRESS_VERSION
-    - umask
-    - ls -l
   except:
     - master
 

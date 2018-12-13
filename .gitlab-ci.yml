@@ -25,7 +25,7 @@ build_wordpress:
     - apk --no-cache add git
     - cd site/wordpress
     - umask
-    - ls -l site/wordpress
+    - ls -l
     # - git checkout master
     - git pull --tags
     - git checkout $WORDPRESS_VERSION

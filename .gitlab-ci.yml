@@ -25,6 +25,7 @@ build_wordpress:
     - apk --no-cache add git
     - cd site/wordpress
     - ls -al
+    - git submodule init
     - git submodule update
     - ls -al
   except:

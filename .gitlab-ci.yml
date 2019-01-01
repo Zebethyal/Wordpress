@@ -15,8 +15,6 @@ stages:
 build_wordpress:
   stage: prep
   image: docker:stable
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
   variables:
     GIT_SUBMODULE_STRATEGY: none
   artifacts:
@@ -42,7 +40,8 @@ build_image:
   dependencies:
     - build_wordpress
   script:
-    - docker build --pull -t $IMAGE .
+    - docker pull $IMAGE || true
+    - docker build --cache-from $IMAGE -t $IMAGE .
     - docker push $IMAGE
   except:
     - master

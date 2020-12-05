@@ -98,6 +98,10 @@ define('WP_CONTENT_URL', 'unset');
 define('WP_PLUGIN_URL', 'unset');
 define('FS_METHOD', 'direct');
 
+# Leave this set to false. We're in a container, so we will
+# never be able to update from inside of Wordpress
+define( 'WP_AUTO_UPDATE_CORE', false );
+
 EOPHP
       chown www-data:www-data /var/www/html/shared/wp-config.php
       chmod 640 /var/www/html/shared/wp-config.php

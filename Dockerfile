@@ -1,4 +1,4 @@
-FROM php:7.1-apache
+FROM php:7.4-apache
 
 # install the PHP extensions we need
 RUN set -ex; \
@@ -35,4 +35,3 @@ COPY site /var/www/html/release
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
-

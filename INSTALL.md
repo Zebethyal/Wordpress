@@ -1,23 +1,18 @@
+# Installation Instructions
+
+The instructions below are for running the container under Kubernetes.
+
 ## TL;DR
 
-Start a container with the following configuration:
+Deploy a workload with the following configuration:
 
-1. Set the following variables:
+1. Variables:
     - WORDPRESS_DB_HOST
-    - WORDPRESS_DB_PASSWORD_FILE (or WORDPRESS_DB_PASSWORD if you have no choice)
+    - WORDPRESS_DB_PASSWORD (or WORDPRESS_DB_PASSWORD_FILE)
     - WORDPRESS_DB_NAME
     - WORDPRESS_DB_USER
     - WORDPRESS_URL
 2. Mount a persistent volume at `/var/www/html/shared`
-
-This could look something like:
-```
-docker run -d -v wp-data:/var/www/html/shared -p 8080:80 \
--e WORDPRESS_DB_HOST='db.example.com' -e WORDPRESS_DB_USER='wp_user' \
--e WORDPRESS_DB_PASSWORD='useRancherSecretsInstead' \
--e WORDPRESS_DB_NAME='wordpress' -e WORDPRESS_URL='https://www.example.com' \
-monachus/wordpress:v5.3.3
-```
 
 ## Detailed Version
 
@@ -42,8 +37,6 @@ This is in addition to the [other variables](https://hub.docker.com/_/wordpress/
 
 ### Using WORDPRESS_DB_PASSWORD or WORDPRESS_DB_PASSWORD_FILE
 
-Use a platform that lets you deploy secrets safely, such as Kubernetes.
+Create a Secret that contains `WORDPRESS_DB_PASSWORD` and attach that to your Pod at runtime. Kubernetes will safely handle the environment variables.
 
-When you use Kubernetes, create a secret that contains `WORDPRESS_DB_PASSWORD` and attach that to your container at runtime. Kubernetes will safely handle the environment variables.
-
-You can also mount the secret as a volume instead of an environment variable and point `WORDPRESS_DB_PASSWORD_FILE` to its location. The init script for the container will read the contents of this file and place it in the appropriate location in the config.
+You can also mount the Secret as a volume instead of an environment variable and point `WORDPRESS_DB_PASSWORD_FILE` to its location. The init script for the container will read the contents of this file and place it in the appropriate location in the config.

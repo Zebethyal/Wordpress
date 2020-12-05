@@ -102,6 +102,9 @@ define('FS_METHOD', 'direct');
 # never be able to update from inside of Wordpress
 define( 'WP_AUTO_UPDATE_CORE', false );
 
+# Disable file editing
+define('DISALLOW_FILE_EDIT', true);
+
 EOPHP
       chown www-data:www-data /var/www/html/shared/wp-config.php
       chmod 640 /var/www/html/shared/wp-config.php
@@ -214,11 +217,13 @@ EOPHP
   if [ ! -d /var/www/html/shared ]; then
     mkdir -p /var/www/html/shared
     chown www-data:www-data /var/www/html/shared
+    chmod 755 /var/www/html/shared
   fi
 
   # init wp-content if it's not already there
   if [ ! -d /var/www/html/shared/wp-content ]; then
     cp -Rp /var/www/html/release/wordpress/wp-content /var/www/html/shared/
+    chown -R www-data /var/www/html/shared/wp-content
   fi
 
   # init .htaccess if not present
@@ -239,6 +244,13 @@ EOT
   fi
   # edit document root
   sed -i "/DocumentRoot/c\DocumentRoot /var/www/html/release" /etc/apache2/sites-available/000-default.conf
+
+  # set security
+  chmod 400 /var/www/html/shared/wp-config.php
+  chmod 600 /var/www/html/shared/.htaccess
+
+  # final cleanup
+  rm /var/www/html/shared/sed* || true
 
   # now that we're definitely done writing configuration, let's clear out the relevant envrionment variables (so that stray "phpinfo()" calls don't leak secrets from our code)
   for e in "${envs[@]}"; do

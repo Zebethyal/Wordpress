@@ -4,7 +4,7 @@ set -euo pipefail
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
-#  "$XYZ_DB_PASSWORD" from a file, especially for Docker's secrets feature)
+#  "$XYZ_DB_PASSWORD" from a file, useful for secrets mounted as files)
 file_env() {
   local var="$1"
   local fileVar="${var}_FILE"
@@ -24,8 +24,9 @@ file_env() {
 }
 
 if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
-  # allow any of these "Authentication Unique Keys and Salts." to be specified via
-  # environment variables with a "WORDPRESS_" prefix (ie, "WORDPRESS_AUTH_KEY")
+  # allow any of these "Authentication Unique Keys and Salts" to be specified
+  # via environment variables with a `WORDPRESS_` prefix
+  # (e.g. `WORDPRESS_AUTH_KEY` for `AUTH_KEY`)
   uniqueEnvs=(
     AUTH_KEY
     SECURE_AUTH_KEY
@@ -147,7 +148,7 @@ EOPHP
         set_config "$unique" "${!uniqVar}"
       else
         # if not specified, let's generate a random value
-        currentVal="$(sed -rn -e "s/define\((([\'\"])$unique\2\s*,\s*)(['\"])(.*)\3\);/\4/p" /var/www/html/shared/wp-config.php)"
+        currentVal="$(sed -rn -e "s/define\(\s*((['\"])$unique\2\s*,\s*)(['\"])(.*)\3\s*\);/\4/p" /var/www/html/shared/wp-config.php)"
         if [ "$currentVal" = 'put your unique phrase here' ]; then
           set_config "$unique" "$(head -c1m /dev/urandom | sha1sum | cut -d' ' -f1)"
         fi

@@ -247,7 +247,7 @@ EOT
 
   # set security
   chmod 400 /var/www/html/shared/wp-config.php
-  chmod 600 /var/www/html/shared/.htaccess
+  chmod 644 /var/www/html/shared/.htaccess
 
   # final cleanup
   rm /var/www/html/shared/sed* || true

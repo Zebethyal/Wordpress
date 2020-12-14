@@ -9,7 +9,7 @@ if [[ -n $POLYSCRIPT_MODE && $POLYSCRIPT_MODE != 'off' ]]; then
 	    echo "Copying /wordpress to /var/www/html to be polyscripted in place..."
 	    echo "This will prevent changes from being saved back to /wordpress, but will protect"
 	    echo "against code injection attacks..."
-		cp -R /wordpress /var/www/html
+            cp -Rp /wordpress /var/www/html
 	fi
 
 	echo "Starting polyscripted WordPress"
@@ -31,9 +31,7 @@ if [[ -n $POLYSCRIPT_MODE && $POLYSCRIPT_MODE != 'off' ]]; then
 		ln -s /wordpress/shared/wp-content/uploads /var/www/html/shared/wp-content/uploads
 	fi
 else
-    echo "Polyscripted mode is off. To enable it, either:"
-    echo "  1. Set the environment variable: MODE=polyscripted"
-    echo "  2. OR create a file at path: /polyscripted"
+    echo "Polyscripted mode is off. To enable it, set the environment variable: POLYSCRIPT_MODE=polyscripted"
 
     # Symlink the mount so it's editable
     ln -s /wordpress /var/www/html

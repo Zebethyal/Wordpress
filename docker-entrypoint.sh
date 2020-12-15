@@ -261,25 +261,14 @@ EOT
     unset "$e"
   done
 
-	if [ -e /usr/local/bin/scramble.sh ]; then
-		echo "Scrambler script found. Calling it..."
-		/usr/local/bin/scramble.sh
-	fi
+  if [ -e /usr/local/bin/scramble.sh ]; then
+    echo "Scrambler script found. Calling it..."
+    /usr/local/bin/scramble.sh
+  fi
 fi
 
 if [ -f "/usr/local/bin/s_php" ]; then
     rm -rf /usr/local/bin/s_php
 fi
 
-# Get all child processes to send data to us such that we can
-# print restarted apache output to stdout
-
-mkfifo /usr/local/bin/polyscripting/to_main_process
-
-echo "Forking off dispatcher and running $@..."
-/usr/local/bin/polyscripting/dispatch.sh 2323 >& /usr/local/bin/polyscripting/to_main_process &
-/usr/local/bin/tini -s -- "$@" >& /usr/local/bin/polyscripting/to_main_process &
-
-# Infinite wait and print to stdout
-echo "Capturing dispatcher and apache output to stdout..."
-while true; do cat /usr/local/bin/polyscripting/to_main_process; done
+exec "$@"

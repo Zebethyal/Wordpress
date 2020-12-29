@@ -106,8 +106,8 @@ define( 'WP_AUTO_UPDATE_CORE', false );
 define('DISALLOW_FILE_EDIT', true);
 
 EOPHP
-      chown www-data:www-data /var/www/html/shared/wp-config.php || true
-      chmod 640 /var/www/html/shared/wp-config.php || true
+      chown www-data:www-data /var/www/html/shared/wp-config.php
+      chmod 640 /var/www/html/shared/wp-config.php
     fi
 
     # see http://stackoverflow.com/a/2705678/433558

@@ -82,11 +82,11 @@ WORKDIR $PHP_SRC_PATH
 RUN make install
 
 WORKDIR $POLYSCRIPT_PATH
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY site /wordpress/release
-COPY scramble.sh /usr/local/bin
+COPY scripts/scramble.sh /usr/local/bin
 COPY pswp/php7.4/apache/scripts/* $POLYSCRIPT_PATH/
-COPY build-scrambled.sh $POLYSCRIPT_PATH/
+COPY scripts/build-scrambled.sh $POLYSCRIPT_PATH/
 
 VOLUME /wordpress/shared
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

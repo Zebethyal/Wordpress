@@ -98,7 +98,7 @@ RUN set -eux; \
 VOLUME /var/www/html/shared
 WORKDIR /var/www/html/release
 
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY scripts/docker-entrypoint.sh /usr/local/bin/
 COPY site /var/www/html/release
 
 ENTRYPOINT ["docker-entrypoint.sh"]

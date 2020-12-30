@@ -12,7 +12,8 @@ services:
 stages:
   - prep
   - build
-  - release
+  - release_tags
+  - release_master
 
 build_wordpress:
   stage: prep
@@ -51,20 +52,30 @@ build_standard_image:
   except:
     - master
 
-push_to_docker_hub:
+push_master:
   image: docker:stable
-  stage: release
+  stage: release_tags
   script:
     - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
     - docker pull $IMAGE
     - docker pull $IMAGE-pv
     - docker tag $IMAGE $HUB_IMAGE:$CI_BUILD_REF_NAME
-    - docker tag $IMAGE $HUB_IMAGE:latest
     - docker tag $IMAGE-pv $HUB_IMAGE:$CI_BUILD_REF_NAME-pv
-    - docker tag $IMAGE-pv $HUB_IMAGE:latest-pv
     - docker push $HUB_IMAGE:$CI_BUILD_REF_NAME
-    - docker push $HUB_IMAGE:latest
     - docker push $HUB_IMAGE:$CI_BUILD_REF_NAME-pv
-    - docker push $HUB_IMAGE:latest-pv
   only:
     - tags
+
+push_master:
+  image: docker:stable
+  stage: release_master
+  script:
+    - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
+    - docker pull $IMAGE
+    - docker pull $IMAGE-pv
+    - docker tag $IMAGE $HUB_IMAGE:latest
+    - docker tag $IMAGE-pv $HUB_IMAGE:latest-pv
+    - docker push $HUB_IMAGE:latest
+    - docker push $HUB_IMAGE:latest-pv
+  only:
+    - master

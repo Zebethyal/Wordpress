@@ -23,10 +23,27 @@ See [INSTALL.md](INSTALL.md) for instructions on how to deploy Wordpress using t
 
 ## Building Your Own Container
 
+If you use custom PHP modules or other applications that aren't in the default Dockerfile, you'll be building your own containers. I recommend that you do this in a branch or with an alternate Dockerfile so that you don't pollute the main Dockerfile and can still `git pull` to bring down future changes without manually merging conflicts.
+
+If this is your first time working with this repository, run `git submodule update --remote` before continuing. This will initialize the submodule content for Polyverse and Wordpress.
+
+### Polyscripting 
+
+If you're building the Polyscripting container, initialize the `pswp` content:
+
+```
+cd pswp
+git pull
+cd ..
+git add .
+git commit -m 'update polyscripting'
+```
+
+### Wordpress
+
 When a new version of Wordpress is released, change into `site/wordpress` and run the following:
 
 ```
-git submodule update --remote  # only needed the first time
 git fetch --tags
 git checkout <new version>
 cd ..

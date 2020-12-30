@@ -5,7 +5,7 @@ set -euo pipefail
 # This allows me to combine the two entrypoint scripts without
 # symlinking /var/www/html/* to /wordpress/* for non-polyscripted
 # deployments
-if [[ -n $POLYSCRIPT_MODE && $POLYSCRIPT_MODE != 'off' ]]; then
+if [[ -n ${POLYSCRIPT_MODE-} && $POLYSCRIPT_MODE != 'off' ]]; then
   MOUNTPOINT=/wordpress
 else
   MOUNTPOINT=/var/www/html

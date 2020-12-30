@@ -1,5 +1,7 @@
 This is a container that does Wordpress _the right way._
 
+I made a [YouTube video](https://www.youtube.com/watch?v=c5c9yVtQGbU) about how to use this.
+
 ## What's wrong with Wordpress's Docker image?
 
 The container shipped by Wordpress copies over the contents of `/usr/src/wordpress` to `/var/www/html` when the container is first created, but only if no content already exists in `/var/www/html`. This means that if you've already deployed the container and have a persistent volume mounted at that location, you can upgrade your container inage from one version to the next, and although it claims to be an updated version, nothing happens. You're still running the original version because the entire contents of Wordpress were copied.
@@ -17,14 +19,14 @@ This means that you can initialize your container, build your site, deploy it, a
 
 ## Deployment Instructions
 
-See [INSTALL.md](INSTALL.md) for installation instructions.
+See [INSTALL.md](INSTALL.md) for instructions on how to deploy Wordpress using the image on Docker Hub
 
-## Working With This Repository
+## Building Your Own Container
 
 When a new version of Wordpress is released, change into `site/wordpress` and run the following:
 
 ```
-git submodule update --remote
+git submodule update --remote  # only needed the first time
 git fetch --tags
 git checkout <new version>
 cd ..
@@ -33,3 +35,4 @@ git commit -m 'update to new version'
 ```
 
 Build a new image and push it to your container registry, and you're ready to update. Easy peasy.
+

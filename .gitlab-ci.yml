@@ -1,5 +1,6 @@
 variables:
   IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
+  LATEST_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:latest
   DEV_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:develop
   HUB_IMAGE: monachus/wordpress
   DOCKER_DRIVER: overlay2
@@ -33,7 +34,7 @@ build_wordpress:
   except:
     - master
 
-build_image:
+build_standard_image:
   stage: build
   image: docker:stable
   before_script:
@@ -41,9 +42,12 @@ build_image:
   dependencies:
     - build_wordpress
   script:
-    - docker pull $DEV_IMAGE || true
-    - docker build --cache-from $DEV_IMAGE -t $IMAGE .
+    - docker pull $LATEST_IMAGE || true
+    - docker build --cache-from $LATEST_IMAGE -t $IMAGE .
     - docker push $IMAGE
+    - docker pull $LATEST_IMAGE-pv || true
+    - docker build --cache-from $LATEST_IMAGE-pv -t $IMAGE-pv -f Dockerfile.pv .
+    - docker push $IMAGE-pv
   except:
     - master
 
@@ -53,9 +57,14 @@ push_to_docker_hub:
   script:
     - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
     - docker pull $IMAGE
+    - docker pull $IMAGE-pv
     - docker tag $IMAGE $HUB_IMAGE:$CI_BUILD_REF_NAME
     - docker tag $IMAGE $HUB_IMAGE:latest
+    - docker tag $IMAGE-pv $HUB_IMAGE:$CI_BUILD_REF_NAME-pv
+    - docker tag $IMAGE-pv $HUB_IMAGE:latest-pv
     - docker push $HUB_IMAGE:$CI_BUILD_REF_NAME
     - docker push $HUB_IMAGE:latest
+    - docker push $HUB_IMAGE:$CI_BUILD_REF_NAME-pv
+    - docker push $HUB_IMAGE:latest-pv
   only:
     - tags

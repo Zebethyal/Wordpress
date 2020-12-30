@@ -1,6 +1,6 @@
 variables:
   IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
-  LATEST_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:latest
+  MASTER_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:master
   DEV_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:develop
   HUB_IMAGE: monachus/wordpress
   DOCKER_DRIVER: overlay2
@@ -33,7 +33,7 @@ build_submodules:
     - git submodule init
     - git submodule update
 
-build_standard_image:
+build_master:
   stage: build
   image: docker:stable
   before_script:
@@ -41,16 +41,33 @@ build_standard_image:
   dependencies:
     - build_submodules
   script:
-    - docker pull $LATEST_IMAGE || true
-    - docker build --cache-from $LATEST_IMAGE -t $IMAGE .
+    - docker pull $MASTER_IMAGE || true
+    - docker build --cache-from $MASTER_IMAGE -t $IMAGE .
     - docker push $IMAGE
-    - docker pull $LATEST_IMAGE-pv || true
-    - docker build --cache-from $LATEST_IMAGE-pv -t $IMAGE-pv -f Dockerfile.pv .
+    - docker pull $MASTER_IMAGE-pv || true
+    - docker build --cache-from $MASTER_IMAGE-pv -t $IMAGE-pv -f Dockerfile.pv .
+    - docker push $IMAGE-pv
+  only:
+    - master
+
+build_other:
+  stage: build
+  image: docker:stable
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  dependencies:
+    - build_submodules
+  script:
+    - docker pull $MASTER_IMAGE || true
+    - docker build --cache-from $MASTER_IMAGE -t $IMAGE .
+    - docker push $IMAGE
+    - docker pull $MASTER_IMAGE-pv || true
+    - docker build --cache-from $MASTER_IMAGE-pv -t $IMAGE-pv -f Dockerfile.pv .
     - docker push $IMAGE-pv
   except:
     - master
 
-push_tags:
+hub_push_tags:
   image: docker:stable
   stage: release_tags
   script:
@@ -64,7 +81,7 @@ push_tags:
   only:
     - tags
 
-push_master:
+hub_push_master:
   image: docker:stable
   stage: release_master
   script:

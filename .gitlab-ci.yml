@@ -15,7 +15,7 @@ stages:
   - release_tags
   - release_master
 
-build_wordpress:
+build_submodules:
   stage: prep
   image: docker:stable
   variables:
@@ -24,16 +24,14 @@ build_wordpress:
     name: "$CI_JOB_NAME"
     paths: 
      - site/wordpress
+     - pswp
     expire_in: 1 hour
   script:
     - umask 022
     - apk --no-cache add git
     - ls -al
-    - cd site/wordpress
     - git submodule init
     - git submodule update
-  except:
-    - master
 
 build_standard_image:
   stage: build
@@ -52,7 +50,7 @@ build_standard_image:
   except:
     - master
 
-push_master:
+push_tags:
   image: docker:stable
   stage: release_tags
   script:

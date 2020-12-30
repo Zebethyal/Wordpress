@@ -81,16 +81,16 @@ hub_push_tags:
   only:
     - tags
 
-hub_push_master:
-  image: docker:stable
-  stage: release_master
-  script:
-    - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
-    - docker pull $IMAGE
-    - docker pull $IMAGE-pv
-    - docker tag $IMAGE $HUB_IMAGE:latest
-    - docker tag $IMAGE-pv $HUB_IMAGE:latest-pv
-    - docker push $HUB_IMAGE:latest
-    - docker push $HUB_IMAGE:latest-pv
-  only:
-    - master
+#hub_push_master:
+#  image: docker:stable
+#  stage: release_master
+#  script:
+#    - docker login -u $HUB_USERNAME -p $HUB_PASSWORD
+#    - docker pull $IMAGE
+#    - docker pull $IMAGE-pv
+#    - docker tag $IMAGE $HUB_IMAGE:latest
+#    - docker tag $IMAGE-pv $HUB_IMAGE:latest-pv
+#    - docker push $HUB_IMAGE:latest
+#    - docker push $HUB_IMAGE:latest-pv
+#  only:
+#    - master

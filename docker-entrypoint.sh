@@ -1,5 +1,15 @@
 #!/bin/bash
+
 set -euo pipefail
+
+# This allows me to combine the two entrypoint scripts without
+# symlinking /var/www/html/* to /wordpress/* for non-polyscripted
+# deployments
+if [[ -n ${POLYSCRIPT_MODE-} && $POLYSCRIPT_MODE != 'off' ]]; then
+  MOUNTPOINT=/wordpress
+else
+  MOUNTPOINT=/var/www/html
+fi
 
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
@@ -24,6 +34,9 @@ file_env() {
 }
 
 if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
+
+cd $MOUNTPOINT/release
+
   # allow any of these "Authentication Unique Keys and Salts" to be specified
   # via environment variables with a `WORDPRESS_` prefix
   # (e.g. `WORDPRESS_AUTH_KEY` for `AUTH_KEY`)
@@ -83,8 +96,8 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
     # https://github.com/WordPress/WordPress/commit/1acedc542fba2482bab88ec70d4bea4b997a92e4
     sed -ri -e 's/\r$//' wordpress/wp-config*
 
-    if [ ! -e /var/www/html/shared/wp-config.php ]; then
-      awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wordpress/wp-config-sample.php > /var/www/html/shared/wp-config.php <<'EOPHP'
+    if [ ! -e $MOUNTPOINT/shared/wp-config.php ]; then
+      awk '/^\/\*.*stop editing.*\*\/$/ && c == 0 { c = 1; system("cat") } { print }' wordpress/wp-config-sample.php > $MOUNTPOINT/shared/wp-config.php <<'EOPHP'
 // If we're behind a proxy server and using HTTPS, we need to alert Wordpress of that fact
 // see also http://codex.wordpress.org/Administration_Over_SSL#Using_a_Reverse_Proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
@@ -106,8 +119,8 @@ define( 'WP_AUTO_UPDATE_CORE', false );
 define('DISALLOW_FILE_EDIT', true);
 
 EOPHP
-      chown www-data:www-data /var/www/html/shared/wp-config.php
-      chmod 640 /var/www/html/shared/wp-config.php
+      chown www-data:www-data $MOUNTPOINT/shared/wp-config.php
+      chmod 640 $MOUNTPOINT/shared/wp-config.php
     fi
 
     # see http://stackoverflow.com/a/2705678/433558
@@ -137,7 +150,7 @@ EOPHP
         start="^(\s*)$(sed_escape_lhs "$key")\s*="
         end=";"
       fi
-      sed -ri -e "s/($start\s*).*($end)$/\1$(sed_escape_rhs "$(php_escape "$value" "$var_type")")\3/" /var/www/html/shared/wp-config.php
+      sed -ri -e "s/($start\s*).*($end)$/\1$(sed_escape_rhs "$(php_escape "$value" "$var_type")")\3/" $MOUNTPOINT/shared/wp-config.php
     }
 
     set_config 'DB_HOST' "$WORDPRESS_DB_HOST"
@@ -155,7 +168,7 @@ EOPHP
         set_config "$unique" "${!uniqVar}"
       else
         # if not specified, let's generate a random value
-        currentVal="$(sed -rn -e "s/define\(\s*((['\"])$unique\2\s*,\s*)(['\"])(.*)\3\s*\);/\4/p" /var/www/html/shared/wp-config.php)"
+        currentVal="$(sed -rn -e "s/define\(\s*((['\"])$unique\2\s*,\s*)(['\"])(.*)\3\s*\);/\4/p" $MOUNTPOINT/shared/wp-config.php)"
         if [ "$currentVal" = 'put your unique phrase here' ]; then
           set_config "$unique" "$(head -c1m /dev/urandom | sha1sum | cut -d' ' -f1)"
         fi
@@ -214,21 +227,21 @@ EOPHP
   fi
 
   # make sure our shared content locations are present
-  if [ ! -d /var/www/html/shared ]; then
-    mkdir -p /var/www/html/shared
-    chown www-data:www-data /var/www/html/shared
-    chmod 755 /var/www/html/shared
+  if [ ! -d $MOUNTPOINT/shared ]; then
+    mkdir -p $MOUNTPOINT/shared
+    chown www-data:www-data $MOUNTPOINT/shared
+    chmod 755 $MOUNTPOINT/shared
   fi
 
   # init wp-content if it's not already there
-  if [ ! -d /var/www/html/shared/wp-content ]; then
-    cp -Rp /var/www/html/release/wordpress/wp-content /var/www/html/shared/
-    chown -R www-data /var/www/html/shared/wp-content
+  if [ ! -d $MOUNTPOINT/shared/wp-content ]; then
+    cp -Rp $MOUNTPOINT/release/wordpress/wp-content $MOUNTPOINT/shared/
+    chown -R www-data $MOUNTPOINT/shared/wp-content
   fi
 
   # init .htaccess if not present
-  if [ ! -f /var/www/html/shared/.htaccess ]; then
-    cat << "EOT" > /var/www/html/shared/.htaccess
+  if [ ! -f $MOUNTPOINT/shared/.htaccess ]; then
+    cat << "EOT" > $MOUNTPOINT/shared/.htaccess
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -246,16 +259,26 @@ EOT
   sed -i "/DocumentRoot/c\DocumentRoot /var/www/html/release" /etc/apache2/sites-available/000-default.conf
 
   # set security
-  chmod 400 /var/www/html/shared/wp-config.php
-  chmod 644 /var/www/html/shared/.htaccess
+  chmod 640 $MOUNTPOINT/shared/wp-config.php
+  chown www-data $MOUNTPOINT/shared/wp-config.php
+  chmod 644 $MOUNTPOINT/shared/.htaccess
 
   # final cleanup
-  rm /var/www/html/shared/sed* || true
+  rm -f $MOUNTPOINT/shared/sed* || true
 
   # now that we're definitely done writing configuration, let's clear out the relevant envrionment variables (so that stray "phpinfo()" calls don't leak secrets from our code)
   for e in "${envs[@]}"; do
     unset "$e"
   done
+
+  if [ -e /usr/local/bin/scramble.sh ]; then
+    echo "Scrambler script found. Calling it..."
+    /usr/local/bin/scramble.sh
+  fi
+fi
+
+if [ -f "/usr/local/bin/s_php" ]; then
+    rm -rf /usr/local/bin/s_php
 fi
 
 exec "$@"

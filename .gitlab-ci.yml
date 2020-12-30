@@ -39,7 +39,7 @@ build_standard_image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
   dependencies:
-    - build_wordpress
+    - build_submodules
   script:
     - docker pull $LATEST_IMAGE || true
     - docker build --cache-from $LATEST_IMAGE -t $IMAGE .

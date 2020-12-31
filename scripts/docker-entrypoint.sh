@@ -278,7 +278,7 @@ EOT
 fi
 
 if [ -f "/usr/local/bin/s_php" ]; then
-    rm -rf /usr/local/bin/s_php
+    rm -f /usr/local/bin/s_php
 fi
 
 exec "$@"

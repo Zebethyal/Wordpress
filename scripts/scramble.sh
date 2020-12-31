@@ -1,6 +1,8 @@
 #!/bin/bash
 
-rm -rf /var/www/html
+# just in case there's something in /var/www/html that we don't
+# want to delete
+mv /var/www/html /var/www/html.bak && mkdir /var/www/html
 
 if [[ -n $POLYSCRIPT_MODE && $POLYSCRIPT_MODE != 'off' ]]; then
 

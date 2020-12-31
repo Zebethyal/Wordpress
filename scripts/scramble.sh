@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # just in case there's something in /var/www/html that we don't
-# want to delete
-mv /var/www/html /var/www/html.bak && mkdir /var/www/html
+# want to delete, like an accidental NFS share
+mv /var/www/html /var/www/html.bak
 
 if [[ -n $POLYSCRIPT_MODE && $POLYSCRIPT_MODE != 'off' ]]; then
 

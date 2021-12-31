@@ -9,6 +9,11 @@ if [[ -n ${POLYSCRIPT_MODE-} && $POLYSCRIPT_MODE != 'off' ]]; then
   MOUNTPOINT=/wordpress
 else
   MOUNTPOINT=/var/www/html
+  for dir in shared release; do
+    if [[ ! -d $MOUNTPOINT/$dir && -d /wordpress/$dir ]]; then
+      ln -s /wordpress/$dir $MOUNTPOINT/$dir && echo "Linked $MOUNTPOINT/$dir to /wordpress/$dir."
+    fi
+  done
 fi
 
 # usage: file_env VAR [DEFAULT]
